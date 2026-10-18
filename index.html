@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simple DSCR Calculator | Quicker Home Loans</title>
+<meta name="description" content="Free, simple DSCR calculator for rental property loans. Enter rent, loan, rate, taxes and insurance to see your debt service coverage ratio and maximum loan.">
+<link rel="canonical" href="https://quickerhomeloans.github.io/dscr-calculator/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --brand:#006D3A; --brand-dark:#00502B; --ink:#0A0A0A; --muted:#525252; --line:#E5E5E5; --bg:#FAFAF7; --card:#FFFFFF; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Plus Jakarta Sans', system-ui, sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; }
+  main { max-width:760px; margin:0 auto; padding:40px 16px 56px; }
+  h1 { font-size:2.25rem; font-weight:800; letter-spacing:-0.02em; margin:0 0 8px; }
+  .lede { color:var(--muted); margin:0 0 28px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:24px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  label { display:block; font-size:.85rem; font-weight:600; margin-bottom:6px; }
+  input, select { width:100%; padding:10px 12px; font:inherit; border:1px solid var(--line); border-radius:10px; background:#fff; }
+  input:focus, select:focus { outline:2px solid var(--brand); outline-offset:1px; }
+  .check { display:flex; align-items:center; gap:8px; font-weight:600; font-size:.9rem; margin-top:4px; }
+  .check input { width:auto; }
+  .results { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; }
+  .stat { background:var(--bg); border-radius:14px; padding:14px; }
+  .stat span { display:block; font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .stat strong { font-size:1.5rem; font-weight:800; }
+  .dscr-good { color:var(--brand); }
+  .cta { margin-top:24px; padding:20px; border-radius:16px; background:var(--ink); color:#fff; }
+  .cta a { color:#5DE08C; font-weight:700; }
+  footer { margin-top:28px; font-size:.75rem; color:var(--muted); }
+  footer a { color:var(--brand-dark); }
+  @media (max-width:560px) { .grid, .results { grid-template-columns:1fr; } h1 { font-size:1.75rem; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Simple DSCR Calculator</h1>
+  <p class="lede">Debt service coverage ratio (DSCR) = monthly rent &divide; monthly PITIA (principal, interest, taxes, insurance, HOA). Enter your numbers below.</p>
+
+  <div class="card">
+    <div class="grid">
+      <div><label for="rent">Monthly rent ($)</label><input id="rent" type="number" inputmode="decimal" min="0" placeholder="2400"></div>
+      <div><label for="loan">Loan amount ($)</label><input id="loan" type="number" inputmode="decimal" min="0" placeholder="250000"></div>
+      <div><label for="rate">Interest rate (%)</label><input id="rate" type="number" inputmode="decimal" min="0" step="0.125" placeholder="7.0"></div>
+      <div><label for="term">Term</label>
+        <select id="term"><option value="30">30 years</option><option value="40">40 years</option><option value="25">25 years</option><option value="15">15 years</option></select>
+      </div>
+      <div><label for="taxes">Annual property taxes ($)</label><input id="taxes" type="number" inputmode="decimal" min="0" placeholder="3600"></div>
+      <div><label for="ins">Annual insurance ($)</label><input id="ins" type="number" inputmode="decimal" min="0" placeholder="1200"></div>
+      <div><label for="hoa">Monthly HOA ($)</label><input id="hoa" type="number" inputmode="decimal" min="0" placeholder="0"></div>
+      <div><label for="target">Target DSCR</label><input id="target" type="number" inputmode="decimal" min="0" step="0.05" value="1.00"></div>
+    </div>
+    <label class="check"><input id="io" type="checkbox"> Interest-only payment</label>
+
+    <div class="results" aria-live="polite">
+      <div class="stat"><span>DSCR</span><strong id="out-dscr">&ndash;</strong></div>
+      <div class="stat"><span>Monthly PITIA</span><strong id="out-pitia">&ndash;</strong></div>
+      <div class="stat"><span>Max loan at target</span><strong id="out-max">&ndash;</strong></div>
+    </div>
+  </div>
+
+  <div class="cta">
+    Need vacancy, operating expenses, cash flow, cap rate, or a PDF? Use the full
+    <a href="https://quickerhomeloans.com/calculators/dscr">DSCR Rental Calculator</a>
+    or learn how <a href="https://quickerhomeloans.com/loans/dscr">DSCR loans</a> work.
+  </div>
+
+  <footer>
+    Estimates only. Not a loan offer or commitment; actual terms depend on underwriting.
+    Built by <a href="https://quickerhomeloans.com">Quicker Home Loans</a>, a business-purpose lender for investment properties.
+    Open source (MIT): <a href="https://github.com/quickerhomeloans/dscr-calculator">github.com/quickerhomeloans/dscr-calculator</a>
+  </footer>
+</main>
+
+<script src="dscr.js"></script>
+<script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    function read() {
+      return {
+        monthlyRent: $('rent').value, loanAmount: $('loan').value, rate: $('rate').value,
+        termYears: $('term').value, annualTaxes: $('taxes').value, annualInsurance: $('ins').value,
+        monthlyHoa: $('hoa').value, targetDscr: $('target').value, interestOnly: $('io').checked
+      };
+    }
+    function render() {
+      var input = read();
+      var hasCore = input.monthlyRent && input.rate;
+      if (input.loanAmount && hasCore) {
+        var r = DSCR.dscr(input);
+        $('out-dscr').textContent = r.dscr.toFixed(2);
+        $('out-dscr').className = r.dscr >= (Number(input.targetDscr) || 1) ? 'dscr-good' : '';
+        $('out-pitia').textContent = usd.format(r.pitia);
+      } else {
+        $('out-dscr').innerHTML = '&ndash;'; $('out-dscr').className = ''; $('out-pitia').innerHTML = '&ndash;';
+      }
+      $('out-max').innerHTML = hasCore ? usd.format(DSCR.maxLoan(input)) : '&ndash;';
+    }
+    document.querySelectorAll('input, select').forEach(function (el) {
+      el.addEventListener('input', render);
+      el.addEventListener('change', render);
+    });
+    render();
+  })();
+</script>
+</body>
+</html>
